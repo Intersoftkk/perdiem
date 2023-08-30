@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "114077189046",
+    "project_id": "perdiem-4c1a4",
+    "storage_bucket": "perdiem-4c1a4.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:114077189046:android:bc83e6427b862c6588b717",
+        "android_client_info": {
+          "package_name": "com.perdiem"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "114077189046-8ur75jjgnlr7jm2jap9hbjju9h41pro2.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.perdiem",
+            "certificate_hash": "5e8f16062ea3cd2c4a0d547876baa6f38cabf625"
+          }
+        },
+        {
+          "client_id": "114077189046-mra9nek8jjodef40lgfj0usu6dsm4ct3.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.perdiem",
+            "certificate_hash": "aa0ae08474c798876a47d143f86ffbdafbb98232"
+          }
+        },
+        {
+          "client_id": "114077189046-rftp20qbud7o31hhpd3gk5priicnim2n.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA3N8u8zYEIkDSH2eqiFnVNqn5MYhbKf3U"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "114077189046-rftp20qbud7o31hhpd3gk5priicnim2n.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
