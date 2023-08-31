@@ -70,7 +70,10 @@ const CustomTextInput = props => (
       </View>
     )}
     {props.eye && (
-      <TouchableOpacity style={{flex: 0.1}} activeOpacity={0.7} onPress={props.eyePress}>
+      <TouchableOpacity
+        style={{flex: 0.1}}
+        activeOpacity={0.7}
+        onPress={props.eyePress}>
         <VectorIcons
           type="ionicons"
           name={!props.password ? 'eye' : 'eye-off'}
