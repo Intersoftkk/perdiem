@@ -7,8 +7,6 @@ export const setObjectValue = async (key, value) => {
   } catch (e) {
     // save error
   }
-
-  console.log(' set Done.');
 };
 
 export const getMyObject = async key => {
@@ -18,8 +16,6 @@ export const getMyObject = async key => {
   } catch (e) {
     // read error
   }
-
-  console.log('get Done.');
 };
 
 export const removeValue = async key => {
@@ -28,8 +24,6 @@ export const removeValue = async key => {
   } catch (e) {
     // remove error
   }
-
-  console.log('remove Done.');
 };
 
 export const ASYNC_STORAGE_KEYS = {

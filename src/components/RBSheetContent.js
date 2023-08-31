@@ -6,7 +6,6 @@ import VectorIcons from "./VectorIcons";
 
 export default class RBSheetContent extends React.Component {
     press = (type) => {
-        console.log(type, this.props.rbSheet);
         if(this.props.rbSheet) {
             if(this.props.todoFocused) {
                 this.props.focusPosts();

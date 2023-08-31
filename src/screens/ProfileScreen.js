@@ -1,19 +1,32 @@
 import React from 'react';
-import { SafeAreaView, ScrollView, Text, View } from 'react-native';
+import { SafeAreaView, ScrollView, Text, TouchableOpacity, View, BackHandler } from 'react-native';
 import { styles } from '../components/CommonStyles';
 import RBSheetContent from '../components/RBSheetContent';
 import { getMyObject, removeValue } from '../components/AsyncStorage';
 import { parseApiResponseMessage } from '../components/Api';
 import CustomButton from '../components/CustomButton';
+import RBSheet from 'react-native-raw-bottom-sheet';
+import VectorIcons from '../components/VectorIcons';
+import { isLoggedIn } from '../components/Constants';
+import { CommonActions } from '@react-navigation/native';
 
 export default class ProfileScreen extends React.Component {
     state = {
         name: '',
         email: '',
         password: '',
-        google: false
+        google: false,
+        todoFocused: true,
+        postFocused: false
     }
     async componentDidMount() {
+        BackHandler.addEventListener('hardwareBackPress', () => {
+            this.props.navigation.navigate("HomeScreen", {
+                todoFocused: this.props.route.params ? this.props.route.params.todoFocused : true,
+                postFocused: this.props.route.params ? this.props.route.params.postFocused : false,
+            });
+            return true;
+        })
         this.props.navigation.addListener('focus', async () => {
             let name = await getMyObject('name');
             let email = await getMyObject('email');
@@ -24,8 +37,8 @@ export default class ProfileScreen extends React.Component {
                 email: parseApiResponseMessage(email), 
                 password: parseApiResponseMessage(password),
                 google: google != null ? parseApiResponseMessage(google) : false,
-            }, () => {
-                console.log(this.state.google);
+                todoFocused: this.props.route.params ? this.props.route.params.todoFocused : true,
+                postFocused: this.props.route.params ? this.props.route.params.postFocused : false,
             });
         })
     } 
@@ -36,11 +49,39 @@ export default class ProfileScreen extends React.Component {
         if(this.state.google) {
             await removeValue('google');
         }
-        this.props.navigation.navigate("LoginScreen");
+        isLoggedIn.isLoggedIn = false;
+        this.props.navigation.dispatch(
+            CommonActions.reset({
+                index: 1,
+                routes: [{
+                  name: "LoginScreen"
+                }]
+            })
+        );
+    }
+    componentWillUnmount() {
+        
+        BackHandler.removeEventListener('hardwareBackPress', () => {
+            this.props.navigation.navigate("HomeScreen", {
+                todoFocused: this.props.route.params ? this.props.route.params.todoFocused : true,
+                postFocused: this.props.route.params ? this.props.route.params.postFocused : false,
+            });
+            return true;
+        })
     }
     render = () => (
         <SafeAreaView style={styles.container}>
             
+            <TouchableOpacity
+                activeOpacity={0.7}
+                onPress={() => this.props.navigation.navigate("HomeScreen", {todoFocused: true, postFocused: false})}
+            >
+                <VectorIcons
+                    name="arrow-back"
+                    size={30}
+                    color="#0000FF"
+                />
+            </TouchableOpacity>
             <ScrollView
                 showsVerticalScrollIndicator={false}
                 contentContainerStyle={[styles.centerList, {alignItems: 'flex-start'}]}
@@ -48,6 +89,26 @@ export default class ProfileScreen extends React.Component {
                 <Text
                     style={[styles.itemTitleStyle, {fontSize: 20, alignSelf: 'center'}]}
                 >Profile</Text>
+                <View style={{height: 40}} />
+                <View
+                    style={{ 
+                        alignSelf: 'center', 
+                        height: 100,
+                        width: 100,
+                        borderRadius: 100 / 2,
+                        borderWidth: 1,
+                        borderColor: '#808080',
+                        padding: 15,
+                        justifyContent: 'center',
+                        alignItems: 'center'
+                    }}
+                >
+                    <VectorIcons
+                        name="person"
+                        size={50}
+                        color="#808080"
+                    />
+                </View>
                 <View style={{height: 40}} />
                 <View style={[styles.rowStyle, {width: '100%'}]}>
                     <Text
@@ -73,7 +134,7 @@ export default class ProfileScreen extends React.Component {
                     >Password</Text>
                     <Text
                         style={[styles.itemBodyStyle, {fontSize: 17}]}
-                    >{this.state.password}</Text>
+                    >********</Text>
                 </View>}
                 <View style={{height: 40}} />
                 <CustomButton
@@ -86,12 +147,35 @@ export default class ProfileScreen extends React.Component {
                 />
                 <View style={{marginBottom: 100}} />
             </ScrollView>
+            
+            <RBSheet
+                ref={ref => {
+                    this.RBSheet = ref;
+                }}
+                height={250}
+                openDuration={250}
+                customStyles={{
+                    container: styles.rbSheetContainer
+                }}
+            >
+                <RBSheetContent 
+                    rbSheet={true}
+                    todoFocused={this.state.todoFocused} 
+                    postFocused={this.state.postFocused} 
+                    focusTodo={() => this.setState({todoFocused: true, postFocused: false, isLoading: true, todos: [], posts: []}, () => this.props.navigation.navigate("HomeScreen", {todoFocused: true, postFocused: false}))} 
+                    focusPosts={() => this.setState({todoFocused: false, postFocused: true, isLoading: true, todos: [], posts: []}, () => this.props.navigation.navigate("HomeScreen", {todoFocused: false, postFocused: true}))}                     
+                />
+            </RBSheet>
             <RBSheetContent
                 additionalStyle={styles.footerBottom} 
                 showFocused={false}
                 rbSheet={false}
                 profileFocused={true}
-                focusShow={() => this.props.navigation.goBack()} 
+                focusShow={() => {
+                    this.RBSheet.open();
+                }}
+                focusPosts={() => this.setState({todoFocused: false, postFocused: true})}
+                // focusShow={() => this.props.navigation.goBack()} 
                 focusProfile={() => undefined} 
             />
         </SafeAreaView>

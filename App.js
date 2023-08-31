@@ -8,6 +8,7 @@ import { Image } from "react-native";
 import { styles } from "./src/components/CommonStyles";
 import ItemScreen from "./src/screens/ItemScreen";
 import ProfileScreen from "./src/screens/ProfileScreen";
+import { isLoggedIn } from "./src/components/Constants";
 
 const Stack = createNativeStackNavigator();
 
@@ -25,11 +26,13 @@ export default class App extends React.Component {
         initialRouteName: 'LoginScreen',
         isLoggedIn: false
       })
+      isLoggedIn.isLoggedIn = false;
     } else {
       this.setState({
         initialRouteName: 'HomeScreen', 
         isLoggedIn: true
       })
+      isLoggedIn.isLoggedIn = true;
     }
 
     setTimeout(() => this.setState({landingPageOpen: false}), 3000);
@@ -41,7 +44,7 @@ export default class App extends React.Component {
     />
   ) :
     <NavigationContainer>
-      <Stack.Navigator initialRouteName={this.state.isLoggedIn ? 'HomeScreen' : 'LoginScreen'}>
+      <Stack.Navigator initialRouteName={isLoggedIn.isLoggedIn ? 'HomeScreen' : 'LoginScreen'}>
         <Stack.Screen
           name="LoginScreen"
           component={LoginScreen}

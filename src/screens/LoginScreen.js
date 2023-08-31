@@ -1,13 +1,14 @@
 import React, {useEffect, useState} from "react";
-import { Dimensions, Image, SafeAreaView, ScrollView, Text, TouchableOpacity, View, ActivityIndicator } from "react-native";
+import { Dimensions, Image, SafeAreaView, ScrollView, Text, TouchableOpacity, BackHandler, View, ActivityIndicator } from "react-native";
 import { styles } from "../components/CommonStyles";
 import { GoogleSigninButton, GoogleSignin, statusCodes } from "@react-native-google-signin/google-signin";
-import { GoogleSignInConfig, emailRegex } from "../components/Constants";
+import { GoogleSignInConfig, emailRegex, isLoggedIn } from "../components/Constants";
 import CustomTextInput from "../components/CustomTextInput";
 import CustomButton from "../components/CustomButton";
 import SuccessErrorPopup from "../components/SuccessErrorPopup";
 import { setObjectValue } from "../components/AsyncStorage";
 import RBSheet from "react-native-raw-bottom-sheet";
+import { CommonActions } from "@react-navigation/native";
 
 export default class LoginScreen extends React.Component {
   state = {
@@ -25,27 +26,37 @@ export default class LoginScreen extends React.Component {
     showPassword: false
   }
   async componentDidMount() {
+    BackHandler.addEventListener('hardwareBackPress', () => {
+        BackHandler.exitApp();
+        return true;
+    })
     let isGoogleSignedIn = await this.isGoogleSignedIn();
-    console.log('isGoogleSignedIn ==> ', isGoogleSignedIn);
   }
   isGoogleSignedIn = async () => {
     let isSignedIn = await GoogleSignin.isSignedIn();
     this.setState({isSignedIn})
   };
   googleSignIn = async () => {
-    this.setState({isLoading: true})
       GoogleSignin.configure(GoogleSignInConfig);
       try {
           await GoogleSignin.hasPlayServices();
           const userInfo = await GoogleSignin.signIn();
+          this.RBSheet.open();
           await setObjectValue('name', {name: userInfo.user.name});
           await setObjectValue('email', {email: userInfo.user.email});
           await setObjectValue('password', {password: userInfo.user.password});
-          await setObjectValue('google', {google: true});
-          this.setState({isLoading: false})
-          this.props.navigation.navigate("HomeScreen");
+          await setObjectValue('google', {google: true});          
+          this.RBSheet.close();
+          isLoggedIn.isLoggedIn = true;
+          this.props.navigation.dispatch(
+            CommonActions.reset({
+              index: 1,
+              routes: [{
+                name: "HomeScreen"
+              }]
+            })
+          );
         } catch (error) {
-          console.log('error ', error);
           if (error.code === statusCodes.SIGN_IN_CANCELLED) {
             // user cancelled the login flow
           } else if (error.code === statusCodes.IN_PROGRESS) {
@@ -99,8 +110,22 @@ export default class LoginScreen extends React.Component {
       setObjectValue('name', {name: this.state.name.trim()});
       setObjectValue('email', {email: this.state.email.trim()});
       setObjectValue('password', {password: this.state.password.trim()});
-      this.props.navigation.navigate("HomeScreen");
+      isLoggedIn.isLoggedIn = true;
+      this.props.navigation.dispatch(
+        CommonActions.reset({
+          index: 1,
+          routes: [{
+            name: "HomeScreen"
+          }]
+        })
+      );
     })
+  }
+  componentWillUnmount() {
+    
+    BackHandler.removeEventListener('hardwareBackPress', () => {
+      BackHandler.exitApp();
+  })
   }
   render = () => (
     <SafeAreaView style={[styles.container, styles.centerAlign]}>
@@ -186,21 +211,18 @@ export default class LoginScreen extends React.Component {
         </TouchableOpacity>
       </ScrollView>
             
-      {
-        this.state.isLoading &&
-        <RBSheet
-          ref={ref => {
-              this.RBSheet = ref;
-          }}
-          height={250}
-          openDuration={250}
-          customStyles={{
-              container: styles.rbSheetContainer
-          }}
-        >
-            <ActivityIndicator size={'large'} color={'#017bff'} />
-        </RBSheet>
-      }
+      <RBSheet
+        ref={ref => {
+            this.RBSheet = ref;
+        }}
+        height={250}
+        openDuration={250}
+        customStyles={{
+            container: styles.rbSheetContainer
+        }}
+      >
+          <ActivityIndicator size={'large'} color={'#017bff'} />
+      </RBSheet>
       {this.state.isErrorPopup && (
         <SuccessErrorPopup title={'Error'} message={this.state.errorMsg} />
       )}

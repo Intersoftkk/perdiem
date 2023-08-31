@@ -1,5 +1,5 @@
 import React from 'react';
-import { ActivityIndicator, FlatList, SafeAreaView, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, FlatList, SafeAreaView, Text, TouchableOpacity, View, BackHandler } from 'react-native';
 import { styles } from '../components/CommonStyles';
 import { getMyObject } from '../components/AsyncStorage';
 import { callGetApi, endPoints, parseApiResponseMessage } from '../components/Api';
@@ -26,20 +26,25 @@ export default class HomeScreen extends React.Component {
     }
 
     async componentDidMount() {
+        BackHandler.addEventListener('hardwareBackPress', () => {
+            BackHandler.exitApp();
+        })
         this.props.navigation.addListener('focus', async () => {
             let name = await getMyObject('name');
             let email = await getMyObject('email');
             let password = await getMyObject('password');
-            this.RBSheet && this.RBSheet.open();
+            !this.props.route.params && this.RBSheet && this.RBSheet.open();
             this.setState({
                 name: parseApiResponseMessage(name), 
                 email: parseApiResponseMessage(email), 
                 password: parseApiResponseMessage(password),
                 greetingMessage: setGreetingMessage(),
                 isLoading: true,
-                todoFocused: true,
-                postFocused: false,
+                todoFocused: this.props.route.params ? this.props.route.params.todoFocused : true,
+                postFocused: this.props.route.params ? this.props.route.params.postFocused : false,
                 showFocused: true,
+                todos: [],
+                posts: [],
                 profileFocused: false,
                 isErrorPopup: false,
                 errorMsg: ''
@@ -50,15 +55,25 @@ export default class HomeScreen extends React.Component {
     fetchList = async () => {
         if(this.state.todoFocused) {
             let response = await callGetApi(endPoints.todos);
-            response.map(item => item => item.show = false);
+            response.map(item => item.show = false);
             this.setState({isLoading: false, todos: response});
             this.RBSheet.close();
+            this.props.navigation.setParams(false);
         } else {
             let response = await callGetApi(endPoints.posts);
-            response.map(item => item => item.show = false);
+            response.map(item => item.show = false);
             this.setState({isLoading: false, posts: response});
             this.RBSheet.close();
+            this.props.navigation.setParams(false);
         }
+    }
+
+    componentWillUnmount() {
+        
+        BackHandler.removeEventListener('hardwareBackPress', () => {
+            BackHandler.exitApp();
+            return true;
+        })
     }
 
     render = () => (
@@ -88,7 +103,7 @@ export default class HomeScreen extends React.Component {
                         <TouchableOpacity
                             activeOpacity={0.7}
                             onPress={() => {
-                                this.props.navigation.navigate("ItemScreen", {item})
+                                this.props.navigation.navigate("ItemScreen", {item, todoFocused: this.state.todoFocused, postFocused: this.state.postFocused})
                             }}
                             style={styles.listItemStyle}
                         >
@@ -132,7 +147,7 @@ export default class HomeScreen extends React.Component {
                 rbSheet={false}
                 profileFocused={this.state.profileFocused}
                 focusShow={() => this.setState({showFocused: true, profileFocused: false}, () => this.RBSheet.open())} 
-                focusProfile={() => this.props.navigation.navigate("ProfileScreen")} 
+                focusProfile={() => this.props.navigation.navigate("ProfileScreen", {todoFocused: this.state.todoFocused, postFocused: this.state.postFocused})} 
             />
             {this.state.isErrorPopup && (
                 <SuccessErrorPopup title={'Error'} message={this.state.errorMsg} />
