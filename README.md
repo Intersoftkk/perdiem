@@ -9,5 +9,8 @@ git clone https://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@github.com/anirbanhaz
 1. npm install 
 2. (npx) react-native run-android
 
+# Code Formatting Command
+npx prettier --write **/*.js
+
 # ANDROID APK DOWNLOAD LINK 
 https://drive.google.com/file/d/1cSlEiU-atdq8rRlLf37cbtoIkZKLYLjg/view?usp=drive_link

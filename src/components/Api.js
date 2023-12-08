@@ -1,4 +1,4 @@
-import { IsConnected } from "./IsConnected";
+import {IsConnected} from './IsConnected';
 export const baseUrl = 'https://jsonplaceholder.typicode.com/';
 export const callGetApi = async (endPoints, additionalHeaders) => {
   let isOnline = await IsConnected();
@@ -31,6 +31,6 @@ export const parseApiResponseMessage = data =>
   typeof data == 'object' ? data[Object.keys(data)[0]] : data;
 
 export const endPoints = {
-  todos: 'todos', 
-  posts: 'posts'
-}
+  todos: 'todos',
+  posts: 'posts',
+};
